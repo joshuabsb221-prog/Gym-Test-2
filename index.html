@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#2e3047" />
+    <meta name="description" content="A private, device-local exercise rotation planner." />
+    <title>Rotation — Gym planner</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script type="module" src="app.js"></script>
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <div class="app-shell">
+      <header class="topbar">
+        <button class="wordmark" type="button" data-view-link="today" aria-label="Go to today">ROTATION</button>
+        <button class="icon-button" id="settings-open" type="button" aria-label="Open settings" aria-haspopup="dialog">
+          <span aria-hidden="true">•••</span>
+        </button>
+      </header>
+
+      <main>
+        <section id="today-view" class="view" aria-labelledby="today-heading">
+          <div class="hero">
+            <p class="eyebrow" id="today-label"></p>
+            <div class="hero-row">
+              <div>
+                <h1 id="today-heading">Today’s rotation</h1>
+                <p class="intro" id="today-summary"></p>
+              </div>
+              <button class="quiet-button" id="shuffle" type="button">Shuffle</button>
+            </div>
+          </div>
+
+          <form id="session-form">
+            <div id="recommendations" class="exercise-list" aria-live="polite"></div>
+            <button class="primary-button" id="log-session" type="submit">Log selected exercises</button>
+          </form>
+          <p class="privacy-note">Saved only in this browser.</p>
+        </section>
+
+        <section id="history-view" class="view" aria-labelledby="history-heading" hidden>
+          <div class="hero compact">
+            <p class="eyebrow">YOUR TRAINING</p>
+            <h1 id="history-heading">History</h1>
+            <p class="intro">Individual exercise spacing at a glance.</p>
+          </div>
+
+          <section aria-labelledby="status-heading">
+            <div class="section-heading">
+              <h2 id="status-heading">Exercise status</h2>
+              <span id="status-date" class="muted"></span>
+            </div>
+            <div id="exercise-status" class="status-list"></div>
+          </section>
+
+          <section class="history-section" aria-labelledby="sessions-heading">
+            <div class="section-heading">
+              <h2 id="sessions-heading">Session log</h2>
+              <button class="quiet-button small" id="past-session" type="button">Add past session</button>
+            </div>
+            <div id="session-history"></div>
+          </section>
+        </section>
+      </main>
+
+      <nav class="bottom-nav" aria-label="Primary navigation">
+        <button class="nav-item active" type="button" data-view-link="today" aria-current="page">
+          <span class="nav-mark" aria-hidden="true"></span>Today
+        </button>
+        <button class="nav-item" type="button" data-view-link="history">
+          <span class="nav-mark" aria-hidden="true"></span>History
+        </button>
+      </nav>
+    </div>
+
+    <dialog id="session-dialog" class="sheet-dialog">
+      <form id="session-editor" method="dialog">
+        <div class="dialog-handle" aria-hidden="true"></div>
+        <div class="dialog-title-row">
+          <div>
+            <p class="eyebrow" id="editor-eyebrow">SESSION</p>
+            <h2 id="editor-title">Log a session</h2>
+          </div>
+          <button class="icon-button close-dialog" type="button" aria-label="Close">×</button>
+        </div>
+        <label class="field-label" for="session-date">Date</label>
+        <input id="session-date" class="date-input" name="date" type="date" required />
+        <fieldset>
+          <legend>Exercises completed</legend>
+          <div id="editor-exercises" class="editor-list"></div>
+        </fieldset>
+        <p class="form-error" id="editor-error" role="alert"></p>
+        <div class="dialog-actions">
+          <button class="primary-button" type="submit" value="save">Save session</button>
+          <button class="danger-button" id="delete-session" type="button" hidden>Delete session</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="settings-dialog" class="sheet-dialog">
+      <form method="dialog">
+        <div class="dialog-handle" aria-hidden="true"></div>
+        <div class="dialog-title-row">
+          <div>
+            <p class="eyebrow">PREFERENCES</p>
+            <h2>Settings</h2>
+          </div>
+          <button class="icon-button close-dialog" type="button" aria-label="Close">×</button>
+        </div>
+        <fieldset class="rest-setting">
+          <legend>Full rest days between repeats</legend>
+          <p class="field-help">An exercise returns after this many complete calendar days off.</p>
+          <div class="segmented" id="rest-options">
+            <label><input type="radio" name="rest-days" value="1" /><span>1</span></label>
+            <label><input type="radio" name="rest-days" value="2" /><span>2</span></label>
+            <label><input type="radio" name="rest-days" value="3" /><span>3</span></label>
+            <label><input type="radio" name="rest-days" value="4" /><span>4</span></label>
+          </div>
+        </fieldset>
+        <div class="data-actions">
+          <button class="secondary-button" id="export-data" type="button">Export JSON</button>
+          <button class="secondary-button" id="import-data" type="button">Import JSON</button>
+          <input id="import-file" type="file" accept="application/json,.json" hidden />
+        </div>
+        <p class="settings-message" id="settings-message" role="status"></p>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>
