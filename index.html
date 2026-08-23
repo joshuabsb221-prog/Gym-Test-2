@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#2e3047" />
     <meta name="description" content="A private, device-local exercise rotation planner." />
+    <meta property="og:title" content="Rotation — Gym planner" />
+    <meta property="og:description" content="A quiet exercise spacing planner that keeps individual movements properly rested." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://joshuabsb221-prog.github.io/Gym-Test-2/" />
+    <meta property="og:image" content="https://joshuabsb221-prog.github.io/Gym-Test-2/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Rotation — Gym planner" />
+    <meta name="twitter:description" content="A quiet exercise spacing planner that keeps individual movements properly rested." />
+    <meta name="twitter:image" content="https://joshuabsb221-prog.github.io/Gym-Test-2/og.png" />
     <title>Rotation — Gym planner</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <link rel="stylesheet" href="styles.css" />
     <script type="module" src="app.js"></script>
   </head>
@@ -27,6 +38,7 @@
               <div>
                 <h1 id="today-heading">Today’s rotation</h1>
                 <p class="intro" id="today-summary"></p>
+                <p class="logged-indicator" id="logged-indicator" hidden>Today’s session is logged</p>
               </div>
               <button class="quiet-button" id="shuffle" type="button">Shuffle</button>
             </div>
@@ -37,6 +49,17 @@
             <button class="primary-button" id="log-session" type="submit">Log selected exercises</button>
           </form>
           <p class="privacy-note">Saved only in this browser.</p>
+          <aside class="install-prompt" id="install-prompt" hidden aria-labelledby="install-title">
+            <div>
+              <p class="group-label">QUICK ACCESS</p>
+              <h2 id="install-title">Add Rotation to your Home Screen</h2>
+              <p id="install-copy">Open it like an app and keep it available offline.</p>
+            </div>
+            <div class="install-actions">
+              <button class="secondary-button compact-button" id="install-app" type="button">Install</button>
+              <button class="quiet-button small" id="dismiss-install" type="button">Not now</button>
+            </div>
+          </aside>
         </section>
 
         <section id="history-view" class="view" aria-labelledby="history-heading" hidden>
@@ -45,6 +68,16 @@
             <h1 id="history-heading">History</h1>
             <p class="intro">Individual exercise spacing at a glance.</p>
           </div>
+
+          <section class="calendar-section" aria-labelledby="calendar-heading">
+            <div class="section-heading calendar-heading">
+              <button class="calendar-nav" id="calendar-previous" type="button" aria-label="Previous month">←</button>
+              <h2 id="calendar-heading"></h2>
+              <button class="calendar-nav" id="calendar-next" type="button" aria-label="Next month">→</button>
+            </div>
+            <div class="calendar-weekdays" aria-hidden="true"><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+            <div id="history-calendar" class="calendar-grid"></div>
+          </section>
 
           <section aria-labelledby="status-heading">
             <div class="section-heading">
@@ -58,6 +91,10 @@
             <div class="section-heading">
               <h2 id="sessions-heading">Session log</h2>
               <button class="quiet-button small" id="past-session" type="button">Add past session</button>
+            </div>
+            <div class="history-filters" aria-label="Filter session history">
+              <label><span>Muscle group</span><select id="group-filter"><option value="all">All groups</option></select></label>
+              <label><span>Exercise</span><select id="exercise-filter"><option value="all">All exercises</option></select></label>
             </div>
             <div id="session-history"></div>
           </section>
@@ -123,10 +160,27 @@
           <button class="secondary-button" id="import-data" type="button">Import JSON</button>
           <input id="import-file" type="file" accept="application/json,.json" hidden />
         </div>
+        <p class="backup-date" id="backup-date">No backup exported yet.</p>
         <p class="settings-message" id="settings-message" role="status"></p>
       </form>
     </dialog>
 
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <dialog id="import-dialog" class="sheet-dialog compact-dialog">
+      <form method="dialog">
+        <div class="dialog-handle" aria-hidden="true"></div>
+        <div class="dialog-title-row">
+          <div><p class="eyebrow">IMPORT PREVIEW</p><h2>Review this backup</h2></div>
+          <button class="icon-button close-dialog" type="button" aria-label="Close">×</button>
+        </div>
+        <div id="import-preview" class="import-preview"></div>
+        <p class="field-help">Merge combines exercises logged on the same date. Replace removes this browser’s current history first.</p>
+        <div class="dialog-actions">
+          <button class="primary-button" id="merge-import" type="button">Merge with current history</button>
+          <button class="secondary-button" id="replace-import" type="button">Replace current history</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"><span id="toast-message"></span><button id="toast-action" type="button" hidden>Undo</button></div>
   </body>
 </html>

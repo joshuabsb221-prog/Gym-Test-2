@@ -1,6 +1,6 @@
 # Rotation
 
-Rotation is a private, single-user gym session planner that spaces repetitions of individual exercises. It is a dependency-free static site: no account, server, build process, analytics, or network requests.
+Rotation is a private, single-user gym session planner that spaces repetitions of individual exercises. It is a dependency-free installable web app: no account, server, build process, analytics, or external API requests.
 
 ## How recommendations work
 
@@ -12,6 +12,8 @@ Rotation is a private, single-user gym session planner that spaces repetitions o
 - Equal candidates are spread across muscle groups. Three exercises from one group are avoided unless necessary.
 - If fewer than five exercises are eligible, the least-recently-performed resting exercises fill the remaining places and are clearly labelled with their actual date gap.
 - Shuffle changes tie-breaks without weakening the rest rule.
+- **Replace** swaps one exercise while keeping the rest rule and the other four recommendations intact.
+- Each recommendation explains when it was last performed and why it was selected.
 
 All date calculations use local calendar dates rather than elapsed timestamps, so daylight-saving and timezone offsets do not distort spacing.
 
@@ -28,7 +30,19 @@ Sessions are stored in browser `localStorage` under the single key `rotation-gym
 }
 ```
 
-Use **Settings → Export JSON** to download a complete backup. On another device, open Rotation in the browser and use **Settings → Import JSON**. Import replaces the browser's current Rotation history after confirmation. Invalid dates or unknown exercise IDs are rejected.
+Use **Settings → Export JSON** to download a complete backup. Rotation records when the latest backup was created. On another device, open Rotation and use **Settings → Import JSON**. The preview shows the backup's session count, exercise count, date range, and rest setting before you choose to merge or replace history. A merge combines exercise IDs on matching dates; a replacement removes the current history. Invalid dates or unknown exercise IDs are rejected.
+
+## Install and offline use
+
+Rotation includes a web app manifest, Home Screen icons, and an offline service worker. On iPhone, open the published site in Safari and choose **Share → Add to Home Screen**. Supporting browsers may also display Rotation's Install prompt. After the first successful visit, the app shell remains available without a network connection.
+
+## History and editing
+
+- The monthly calendar marks training days; selecting a marked day opens that session for editing.
+- History can be filtered by muscle group or individual exercise.
+- Each exercise shows its total completion count without tracking weights or progression.
+- Logging, editing, deletion, merge, and replacement actions provide a short Undo option.
+- Moving a session onto a date that already has a session requires confirmation before overwriting it.
 
 ## Run locally
 
@@ -56,7 +70,12 @@ All asset paths are relative, so the app works from a project subpath without co
 .
 ├── README.md
 ├── app.js
+├── icon-192.png
+├── icon-512.png
 ├── index.html
 ├── logic.js
+├── manifest.webmanifest
+├── og.png
+├── service-worker.js
 └── styles.css
 ```

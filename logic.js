@@ -62,6 +62,8 @@ export function normalizeState(candidate = {}) {
   return {
     restDays: Number.isInteger(restDays) && restDays >= 1 && restDays <= 4 ? restDays : MIN_REST_DAYS,
     sessions: [...byDate.values()].sort((a, b) => a.date.localeCompare(b.date)),
+    lastExportedAt: typeof candidate.lastExportedAt === "string" ? candidate.lastExportedAt : null,
+    installDismissedAt: typeof candidate.installDismissedAt === "string" ? candidate.installDismissedAt : null,
   };
 }
 
@@ -91,10 +93,10 @@ function seededTie(seed, id) {
   return (hash >>> 0) / 4294967296;
 }
 
-function rankAndSpread(pool, count, seed) {
+function rankAndSpread(pool, count, seed, initialGroupCounts = new Map()) {
   const selected = [];
   const remaining = [...pool];
-  const groupCounts = new Map();
+  const groupCounts = new Map(initialGroupCounts);
 
   while (selected.length < count && remaining.length) {
     const alternativesBelowCap = remaining.some((item) => (groupCounts.get(item.group) ?? 0) < 2);
@@ -124,6 +126,32 @@ export function recommendSession(sessions, targetDate, restDays = MIN_REST_DAYS,
     selected.push(...rankAndSpread(fallback, SESSION_SIZE - selected.length, seed + 7919));
   }
   return selected;
+}
+
+export function recommendReplacement(sessions, targetDate, restDays, currentIds, seed = 0) {
+  const excluded = new Set(currentIds);
+  const statuses = exerciseStatuses(sessions, targetDate, restDays).filter((item) => !excluded.has(item.id));
+  const groupCounts = new Map();
+  currentIds.forEach((id) => {
+    const exercise = EXERCISES.find((item) => item.id === id);
+    if (exercise) groupCounts.set(exercise.group, (groupCounts.get(exercise.group) ?? 0) + 1);
+  });
+  const eligible = rankAndSpread(statuses.filter((item) => item.eligible), 1, seed, groupCounts);
+  if (eligible.length) return eligible[0];
+  return rankAndSpread(statuses.filter((item) => !item.eligible), 1, seed + 7919, groupCounts)[0] ?? null;
+}
+
+export function mergeHistories(current, imported) {
+  const merged = new Map(current.sessions.map((session) => [session.date, new Set(session.exerciseIds)]));
+  imported.sessions.forEach((session) => {
+    const ids = merged.get(session.date) ?? new Set();
+    session.exerciseIds.forEach((id) => ids.add(id));
+    merged.set(session.date, ids);
+  });
+  return normalizeState({
+    ...current,
+    sessions: [...merged].map(([date, ids]) => ({ date, exerciseIds: [...ids] })),
+  });
 }
 
 export function validateImport(candidate) {
